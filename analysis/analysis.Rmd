@@ -1,6 +1,6 @@
 ---
 title: "Analysis for Project"
-output: 
+output: pdf
   html_document: 
     fig_height: 6
     fig_width: 9
@@ -11,9 +11,102 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 source("useful_functions.R")
+load("output/analytical_data.RData")
+library(MASS)
+library(car)
+library(BMA)
+library(texreg)
+```
+#Cause of Climate Change
+```{r OLS Cause of Climate Change, echo=FALSE, include=TRUE}
+model1.0 <- polr(climatebelief~ideology, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model2.0 <- polr(climatebelief~ideology+educ_category, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model3.0 <- polr(climatebelief~ideology+educ_category+age, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model4.0 <- polr(climatebelief~ideology+educ_category+age+gender, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model5.0 <- polr(climatebelief~ideology+educ_category+age+gender+generation, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model6.0 <- polr(climatebelief~ideology+educ_category+age+gender+generation+service_attendance, mydata, 
+               Hess = FALSE, model = TRUE,method = "logistic")
+
+screenreg(list(model1.0, model2.0, model3.0, model4.0, model5.0, model6.0),
+       #custom.coef.names = c("Intercept","Political Ideology","Level of Education","Age","Gender","Age Cohort","Religious Service Attendance"),
+       caption="OLS regression models predicting belief in the cause of climate change",
+       caption.above = TRUE)
+```
+###Strongly Conservative and Never Attend are the reference categories. Nearly everything is significant in every model which is unsurprising given the size of the dataset. Generational Cohort can probably be removed for just Age since it's a continuous variable rather than ordinal. Gender is significant in each model it's included in but the effect is very weak. Political Ideology seems to be the most influential variable. BUT - remember to exponentiate things so you can know what the log odds are. Unable to choose a model from the table - procede to BMA analysis.
+```{r BMA Cause of Cliamte Change, echo=FALSE, include=TRUE}
+bma_climatebelief <- bic.glm(mydata[,c("ideology","educ_category","age","gender","generation","service_attendance")],mydata$climatebelief=="Anthropogenic Change", glm.family=binomial)
+summary(bma_climatebelief)
+
+bma_climatebelief <- bic.glm(mydata[,c("ideology","educ_category","age","gender","generation","service_attendance")],mydata$climatebelief=="Don't Believe", glm.family=binomial)
+summary(bma_climatebelief)
+```
+###First things first, I have to choose between "Don't Believe" and "Anthropogenic Change" as the functional reference categories for the intercept.To make the case for Don't Believe, it would mean that the odds are contextualized to moving from not believing in climate change to believing that it's occuring regardless of the cause. To make the case for Anthropogenic Change, I would be comparing the odds of moving from believeing to anthropogenic climate change to somewhat of a midpoint between respondents thinking that climate change is either occurring naturally or that it isn't occurring at all. The BMA analysis between the two choices is difficult, but I believe it makes the most sense to keep Don't Believe as the functional reference category for the intercept, given that it hosts the model with the largest post probability score of either BMA while also including most of the same variables as the best model for the Anthropogenic Change BMA (4, post prob score of .532). HOWEVER, the elephant in the room is that Education Category is not included in the chosen model, meaning that I likely need to recode a few things to ensure that the variable is analyzed as best it can be, similar to the ideology and service_attendance variables.
+
+###Having made changes to the educ_category variable, my choice to analyze the model with Don't Believe as the reference variable has been reaffirmed as the chosen model now boasts a higher post probability score as well as the most variables, meaning that it is the model I should choose to analyze (5 variables, post prob score of .854). I'm doing stats now!
+
+
+###Chosen Climate Belief Model
+```{r Chosen Climate Belief Model, echo=FALSE, include=TRUE}
+climatebelief_model1 <- polr(climatebelief~ideology, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+climatebelief_model2 <- polr(climatebelief~ideology+age, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+climatebelief_model3 <- polr(climatebelief~ideology+age+gender, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+climatebelief_model4 <- polr(climatebelief~ideology+age+gender+educ_category, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+climatebelief_model5 <- polr(climatebelief~ideology+age+gender+educ_category+service_attendance, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+screenreg(list(climatebelief_model1,climatebelief_model2,climatebelief_model3,climatebelief_model4,climatebelief_model5),
+       #custom.coef.names = c("Intercept","Political Ideology","Age","Gender","Level of Education","Religious Service Attendance"),
+       caption="OLS regression models predicting belief in the cause of climate change",
+       caption.above = TRUE)
 ```
 
-# Introduction
-<a href="#top">Back to top</a>
+#Harm US
+```{r OLS Harm US, echo=FALSE, include=TRUE}
+model1.1 <- polr(harmUS~ideology, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model2.1 <- polr(harmUS~ideology+educ_category, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model3.1 <- polr(harmUS~ideology+educ_category+age, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model4.1 <- polr(harmUS~ideology+educ_category+age+gender, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model5.1 <- polr(harmUS~ideology+educ_category+age+gender+generation, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+model6.1 <- polr(harmUS~ideology+educ_category+age+gender+generation+service_attendance, mydata, 
+               Hess = FALSE, model = TRUE,method = "logistic")
 
-Use this R Markdown to perform the main analysis for the project. I use this basically as a lab notebook. It contains the main analysis and a variety of sensitivity analysis. The code in this documents serves as a baseline for the eventual tables and figures that will go into the paper. At the same time it will serve as a record of all supplementary analyses performed. 
+screenreg(list(model1.1, model2.1, model3.1, model4.1, model5.1, model6.1),
+       #custom.coef.names = c("Intercept","Political Ideology","Level of Education","Age","Gender","Age Cohort","Religious Service Attendance"),
+       caption.above = TRUE)
+```
+###Similar as the previous OLS modeling, everything is significant except for level of religious ceremony attendance, which is interesting. But, it's still impossible for me to tell from basic modeling which model to actually choose. To the BMA cave!
+```{r BMA Harm US, echo=FALSE, include=TRUE}
+bma_harmUS <- bic.glm(mydata[,c("ideology","educ_category","age","gender","generation","service_attendance")],mydata$harmUS, glm.family=binomial)
+summary(bma_climatebelief)
+```
+###Similar findings as in the previous BMA analysis. Generational cohort seems like a bad variable to inclucde, the best model has 5 variables with a post probability score of over .800, bada bing bada boom I've got a model.
+
+```{r Chosen Harm US Model, echo=FALSE, include=TRUE}
+harmUS_model1 <- polr(climatebelief~ideology, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+harmUS_model2 <- polr(climatebelief~ideology+age, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+harmUS_model3 <- polr(climatebelief~ideology+age+gender, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+harmUS_model4 <- polr(climatebelief~ideology+age+gender+educ_category, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+harmUS_model5 <- polr(climatebelief~ideology+age+gender+educ_category+service_attendance, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+screenreg(list(harmUS_model1,harmUS_model2,harmUS_model3,harmUS_model4,harmUS_model5),
+       #custom.coef.names = c("Intercept","Political Ideology","Age","Gender","Level of Education","Religious Service Attendance"),
+       caption="OLS regression models predicting belief that climate change will harm the United States",
+       caption.above = TRUE)
+```
