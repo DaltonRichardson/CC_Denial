@@ -13,30 +13,78 @@ endnotes: false
 pagenumber: 1
 bibliography: ../project.bib
 biblio-style: ./resources/ajs.bst
-title: "The Title"
+title: "I Can't Believe I Survived Stats - An Autoethnography and Phenomenology of Sociological Research Methods"
 author:
 - affiliation: University of Oregon, Sociology
-  name: Aaron Gullickson
+  name: Dalton Richardson
 - affiliation: Some Research University
-  name: My co-author
-keywords: keywords
-thanks: Thanks to people and stuff
-abstract: This is a test abstract
+  name: The Corgis
+keywords: stats, climate change, anxiety
+thanks: Thanks to the people who are killing the planet for giving me something to study
+abstract: Why do conservatives hate science? This paper doesn't answer that question but I still think it's a pretty good attempt at statistics
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(texreg)
+library(MASS)
 load("../../analysis/output/analytical_data.RData")
 ```
 
 # Introduction
-This research is designed to answer the question "What kinds of demographic characteristics are associated with dis/belief in climate change?". This project reinvestigates past research that has attempted to identify particualr demographic charicteristics that are associated with disbelief in climate change. Previous research has found that white conservative men are more likley to deny the occurrence of climate chagne (McCright and Dunlap 2011). This research investigates the current state of climate belief in the United States as a way to analyze potential changes in the sociodemogrpahic profiles of those who dis/believe in climate change. 
+This research is designed to answer the question "What kinds of demographic characteristics are associated with dis/belief in climate change?". This project reinvestigates past research that has attempted to identify particualr demographic charicteristics that are associated with disbelief in climate change. Previous research has found that white conservative men are more likley to deny the occurrence of climate chagne (McCright and Dunlap 2011). This research investigates the current state of climate belief in the United States as a way to analyze potential changes in the sociodemogrpahic profiles of those who dis/believe in climate change. Additionally, this project utilizes a different dataset than McCright and Dunlap 2011 to allow better insight into the trends present across numerous datasets that measure similar concepts. As such, this project was designed to answer two questions - "are some demographic characterists more associated with a disbelief in the occurrence of climate change than others?" and "what demographic characteristics are associated with the belief that climate change will in some way harm the United States?"
 
 # Data and Methods
-Data were collected across nine years (2008-2017), also referred to as waves, through the use of self-administered web-based surveys by the Yale Program on Climate Change Communication. Surveys were administered on a yearly basis in 2008, while surverys were administed on a twice-yearly basis from 2010 to 2017. The dataset contains a total of 20,024 responses (N = 24,024). The codebook notes that "Prospective members were recruited using a combination of random digit dial and address-based sampling techniques that cover virtually all (noninstitutional) resident phone numbers and addresses in the United States."
+Data were collected across nine years (2008-2017), also referred to as waves, through the use of self-administered web-based surveys by the Yale Program on Climate Change Communication. Surveys were administered on a yearly basis in 2008, while surverys were administed on a twice-yearly basis from 2010 to 2017. The dataset contains a total of 20,024 responses (N = 20,024). The codebook notes that "Prospective members were recruited using a combination of random digit dial and address-based sampling techniques that cover virtually all (noninstitutional) resident phone numbers and addresses in the United States."
+Data were modeled with the use of multinomial logistic regression while model selection was based on a variety of factors but specifically Bayesian model averaging to select the most accurate regression model. One advantage of logistic regression is that it is at a smaller risk of heteroscedastcicity. The results of the regressions are discussed below. 
 
 # Results
+```{r Chosen Climate Belief Model, echo=FALSE, include=TRUE}
+climatebelief_model1 <- polr(climatebelief~ideology, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+climatebelief_model2 <- polr(climatebelief~ideology+age, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+climatebelief_model3 <- polr(climatebelief~ideology+age+gender, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+climatebelief_model4 <- polr(climatebelief~ideology+age+gender+educ_category, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+climatebelief_model5 <- polr(climatebelief~ideology+age+gender+educ_category+service_attendance, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+screenreg(list(climatebelief_model1,climatebelief_model2,climatebelief_model3,climatebelief_model4,climatebelief_model5),
+       #custom.coef.names = c("Intercept","Political Ideology","Age","Gender","Level of Education","Religious Service Attendance"),
+       caption="OLS regression models predicting belief in the cause of climate change",
+       caption.above = TRUE)
+```
+### BRIEF ASIDE - I TRIED MY BEST TO REMEMBER THE DIFFERENCE BETWEEN LOG ODDS AND PROBABILITIES AND HOW TO MANUVER BETWEEN THE TWO. 
+There are no apparent issues with colinearity with this dataset. Table 1 shows the answer to the question are some demographic characteristics more associated with a disbelief in the occurrence of climate change than others?" As shown by the table, nearly every variable is statistically significant, but it is important to avoid conflating statistically significant with the magnitude of the effect. 
+Model 1 shows that individuals who identify as liberal are more likely to believe in the existence of climate change. Specifically, those who identify as very liberal (in this data set, the polar opposite of strongly conservative) are over 96% more likely than those who identify as very conservative to believe that climate change is occurring, regardless of if they believe it is naturally occurring or anthropogenically driven (p<.001). 
+In model 2, which includes respondents’ age, all variables continue to be statistically significant, but the inclusion of age has slightly weakened the effects of political ideology. This model also shows why it is important to avoid conflating statistically significant with the magnitude of an effect, as age is shown to have no effect on one’s beliefs in the existence of climate change while remaining a significant part of the model. 
+Model 3, which includes all previous variables as well as gender, all variables remain significant as the effect of political ideology continues to weaken ever so slightly but sees virtually no change in its influencing effect. In this model, those who identify as very liberal (in this data set, the polar opposite of strongly conservative) are over 96% more likely than those who identify as very conservative to believe that climate change is occurring, or the exact same rates as models 1 and 2. Gender is statistically significant in this model and can be interpereted as females being 3% more likely than males to believe in climate change. 
+Model 4 introduces respondents’ educational classification (did not complete high school, completed high school, has some college education, graduated college). The inclusion of this variable drops the influencing effects of ideology the largest amount (from a coefficient of 3.28 for very liberal respondents to 3.24); despite the continued weakening of the influence of political ideology very liberal respondents are still over 96% more likely than very conservative respondents to believe in climate change. For the first time in any model, some effects are not considered statistically significant, specifically between belief in the existence of climate change and having graduated college. However, those who have some college education are 45% less likely than those who did not graduate high school to believe in climate change. The effect of age sees no change between any model in which it is included while the effect of gender slightly increases. 
+The fifth and final model includes respondents’ frequency of attending religious services  and shows that frequency of attending religious services is negatively associated with belief in climate change (specifically, those who report they attend multiple religious services a week are 38% less likely than those who report never attending services to believe in climate change (p<.001)). The influence of political ideology continues to see more decreasing influence, but still maintains the most influential hold on predicting the likelihood of believing in climate change (95% more likely for those who are very liberal compared to very conservative (p<.001)).
+```{r Chosen Harm US Model, echo=FALSE, include=TRUE}
+harmUS_model1 <- polr(harmUS~ideology, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+harmUS_model2 <- polr(harmUS~ideology+age, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+harmUS_model3 <- polr(harmUS~ideology+age+gender, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+harmUS_model4 <- polr(harmUS~ideology+age+gender+educ_category, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+harmUS_model5 <- polr(harmUS~ideology+age+gender+educ_category+service_attendance, mydata, Hess = FALSE, model = TRUE,
+              method = "logistic")
+screenreg(list(harmUS_model1,harmUS_model2,harmUS_model3,harmUS_model4,harmUS_model5),
+       #custom.coef.names = c("Intercept","Political Ideology","Age","Gender","Level of Education","Religious Service Attendance"),
+       caption="OLS regression models predicting belief that climate change will harm the United States",
+       caption.above = TRUE)
 
+```
+Model 1 shows that individuals who identify as liberal are more likely to believe in the existence of climate change. Specifically, those who identify as very liberal (in this data set, the polar opposite of strongly conservative) are roughly 95% more likely than those who identify as very conservative to believe that climate change will impact the United States in some way (p<.001).
+Model 2 includes age in the analysis and actually slightly influences the effects of political ideology. All variables are significant in this model, while the influencing factor of ideology rose from 95% to 96% likelihood that respondents who are very liberal to believe that climate change will harm the United States in some way (p<.001). Age has a slightly influential power, with a one year increase in age associated with a .2% increase in the likelihood of believing that the United States will be harmed by climate change to some degree (p<.001). 
+Model 3 includes gender which slightly mitigates the magnitude of the effect of political ideology, as the probabilty returned back to 95% with the introduction of age (p<.001). The effect of age remains the same from model 2. The gender variable shows that women are approximately 9% more likely to report that they believe climate change will harm the United States to some degree (p<.001). 
+Model 4 introduces education which increases the magnitude of political ideology (p<.001). The effect of education itself is interesting in that it seems to suggest those who are more educated are less likely to believe that the United States will be harmed by climate change, as much as a 37% difference between those who didn't finsih high school and those who graduated college. 
+Model 5 includes religious service attendance which is not statistically significant. It slightly increases the effects of both political ideology (p<.001) and gender (p<.001) while the effect of age remains the same.
 # Conclusions
-
+This research largerly confirms the results of prior research that political ideology is the strongest predictor of beliefs concerning both the existence and impact of climate change. The introduction of religous service attendance shows that there may be some connection between religiosity and perceptions of the legitimacy of climate change, as shown in table 1. It would be worth investigating these findings with other datasets as well as comparing response rates between people of various religions. Age and gender have small effects on these perceptions, obviously outweighed by political ideology, and it's interesting that level of education wasn't as positively correlated with believing in climate change and that it will harm the United States. I believe this to be because of the way the variable was coded, and for future analysis it would make sense for the varirable to be separated by year and degree for more accurate analysis.
 # References
+McCright, Aaron M., and Riley E. Dunlap. 2011. "Cool Dudes: The Denial of Climate Change Among Conservative White Males in the United States." Global Environmental Change 21(4):1163-72.
